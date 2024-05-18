@@ -141,26 +141,34 @@ def sell(phenny, input):
         else:
             phenny.say("You do not have permission to use this command.")
 
+    # Sell all command, player transfers all gold from casino to GGn site balance
     elif args[0] == "all":
         if input.uid in p.players.keys():
             amount = p.players[input.uid].gold
+            # Remove gold from player's casino balance before GGn API call
+            p.players[input.uid].remove_gold(amount)
             success = phenny.callGazelleApi({'uid': input.uid, 'amount': amount, 'action': 'sellGold'})
             if success == False or success['status'] == "error":
+                # API call failed, add gold back to player's casino balance
+                p.players[input.uid].add_gold(amount)
                 phenny.write(('NOTICE', input.nick + " An unknown error occurred."))  # NOTICE
             else:
-                p.players[input.uid].remove_gold(amount)
                 phenny.write(('NOTICE', input.nick + " You sold " + str(amount) + " gold worth of chips."))  # NOTICE
-
+    
+    # Sell a specified amount, player transfers a specified amount of gold from casino to GGn site balance
     else:
         amount = args[0]
         if amount.isdigit() and int(amount) > 0 and input.uid in p.players.keys():
             if int(amount) > p.players[input.uid].gold:
                 amount = p.players[input.uid].gold
+            # Remove gold from player's casino balance before GGn API call
+            p.players[input.uid].remove_gold(amount)
             success = phenny.callGazelleApi({'uid': input.uid, 'amount': amount, 'action': 'sellGold'})
             if success == False or success['status'] == "error":
+                # API call failed, add gold back to player's casino balance
+                p.players[input.uid].add_gold(amount)
                 phenny.write(('NOTICE', input.nick + " An unknown error occurred."))  # NOTICE
             else:
-                p.players[input.uid].remove_gold(amount)
                 phenny.write(('NOTICE', input.nick + " You sold " + str(amount) + " gold worth of chips."))  # NOTICE
         else:
             phenny.write(('NOTICE', input.nick + " You can only cash out with a positive, non-decimal amount of gold. Ex. !sell 100"))  # NOTICE
