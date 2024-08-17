@@ -98,6 +98,7 @@ class Game:
         if not self.can_join:
             self.phenny.say("%s, this game has already started!" % p.players[uid].name)
             return
+	player_added = False   #Hopefully this fixes UnboundLocalError local variable 'player_added' referenced before assignment
         if uid not in p.players.keys():
             player_added = p.add_player(self.phenny, uid, nick)
         if player_added:
